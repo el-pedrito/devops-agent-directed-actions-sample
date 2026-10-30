@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "InvokeBridge",
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": [
+        "arn:aws:lambda:${AGENT_SPACE_REGION}:${AGENT_SPACE_ACCOUNT_ID}:function:${BRIDGE_FUNCTION}",
+        "arn:aws:lambda:${AGENT_SPACE_REGION}:${AGENT_SPACE_ACCOUNT_ID}:function:${BRIDGE_FUNCTION}:*"
+      ]
+    }
+  ]
+}

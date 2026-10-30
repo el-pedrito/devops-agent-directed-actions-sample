@@ -1,0 +1,28 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RouteAnalysis",
+      "Effect": "Allow",
+      "Action": [
+        "networkmanager:StartRouteAnalysis",
+        "networkmanager:GetRouteAnalysis",
+        "networkmanager:DescribeGlobalNetworks",
+        "networkmanager:GetTransitGatewayRegistrations"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ReportWrite",
+      "Effect": "Allow",
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::${REPORT_BUCKET}/reports/*"
+    },
+    {
+      "Sid": "BucketOwnershipCheck",
+      "Effect": "Allow",
+      "Action": "s3:ListAllMyBuckets",
+      "Resource": "*"
+    }
+  ]
+}

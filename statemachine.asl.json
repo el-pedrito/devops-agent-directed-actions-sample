@@ -1,0 +1,82 @@
+{
+  "Comment": "AWS DevOps Agent directed actions: each approval is either auto-approved by a rule or waits for a human (task token).",
+  "StartAt": "AskAgent",
+  "States": {
+    "AskAgent": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${BRIDGE_FUNCTION}",
+        "Payload": { "action": "ask", "prompt.$": "$.prompt" }
+      },
+      "ResultSelector": { "r.$": "$.Payload" },
+      "ResultPath": "$.agent",
+      "Next": "NeedsApproval"
+    },
+    "NeedsApproval": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.agent.r.status", "StringEquals": "PENDING_APPROVAL", "Next": "CheckAutoApprove" },
+        { "Variable": "$.agent.r.status", "StringEquals": "FAILED", "Next": "AgentFailed" }
+      ],
+      "Default": "Done"
+    },
+    "CheckAutoApprove": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${BRIDGE_FUNCTION}",
+        "Payload": { "action": "check", "pending.$": "$.agent.r.pending" }
+      },
+      "ResultSelector": { "auto.$": "$.Payload.auto" },
+      "ResultPath": "$.check",
+      "Next": "AutoOrHuman"
+    },
+    "AutoOrHuman": {
+      "Type": "Choice",
+      "Choices": [
+        { "Variable": "$.check.auto", "BooleanEquals": true, "Next": "AutoApprove" }
+      ],
+      "Default": "WaitForHuman"
+    },
+    "AutoApprove": {
+      "Type": "Pass",
+      "Result": { "decision": "APPROVED", "by": "auto-approve-rule" },
+      "ResultPath": "$.human",
+      "Next": "SendDecision"
+    },
+    "WaitForHuman": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke.waitForTaskToken",
+      "Parameters": {
+        "FunctionName": "${BRIDGE_FUNCTION}",
+        "Payload": {
+          "action": "notify",
+          "taskToken.$": "$$.Task.Token",
+          "pending.$": "$.agent.r.pending"
+        }
+      },
+      "TimeoutSeconds": 3600,
+      "ResultPath": "$.human",
+      "Next": "SendDecision"
+    },
+    "SendDecision": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${BRIDGE_FUNCTION}",
+        "Payload": {
+          "action": "decide",
+          "executionId.$": "$.agent.r.executionId",
+          "pending.$": "$.agent.r.pending",
+          "decision.$": "$.human.decision"
+        }
+      },
+      "ResultSelector": { "r.$": "$.Payload" },
+      "ResultPath": "$.agent",
+      "Next": "NeedsApproval"
+    },
+    "AgentFailed": { "Type": "Fail", "Error": "AgentFailed" },
+    "Done": { "Type": "Succeed" }
+  }
+}

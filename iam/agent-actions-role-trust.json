@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": { "Service": "aidevops.amazonaws.com" },
+      "Action": ["sts:AssumeRole", "sts:SetSourceIdentity", "sts:TagSession"],
+      "Condition": {
+        "StringEquals": { "aws:SourceAccount": "${AGENT_SPACE_ACCOUNT_ID}" },
+        "ArnLike": { "aws:SourceArn": "arn:aws:aidevops:${AGENT_SPACE_REGION}:${AGENT_SPACE_ACCOUNT_ID}:agentspace/*" }
+      }
+    }
+  ]
+}

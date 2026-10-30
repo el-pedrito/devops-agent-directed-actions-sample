@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AgentChatAndApproval",
+      "Effect": "Allow",
+      "Action": ["aidevops:CreateChat", "aidevops:SendMessage", "aidevops:UpdateApprovalAction"],
+      "Resource": "arn:aws:aidevops:${AGENT_SPACE_REGION}:${AGENT_SPACE_ACCOUNT_ID}:agentspace/${AGENT_SPACE_ID}"
+    },
+    {
+      "Sid": "ApprovalChannel",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "${APPROVAL_TOPIC_ARN}"
+    },
+    {
+      "Sid": "Logs",
+      "Effect": "Allow",
+      "Action": ["logs:CreateLogGroup", "logs:CreateLogStream", "logs:PutLogEvents"],
+      "Resource": "arn:aws:logs:${AGENT_SPACE_REGION}:${AGENT_SPACE_ACCOUNT_ID}:log-group:/aws/lambda/${BRIDGE_FUNCTION}*"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[
+  {
+    "operation": "networkmanager:start_route_analysis",
+    "GlobalNetworkId": "${GLOBAL_NETWORK_ID}"
+  },
+  {
+    "operation": "s3:put_object",
+    "Bucket": "${REPORT_BUCKET}",
+    "KeyPrefix": "reports/"
+  }
+]

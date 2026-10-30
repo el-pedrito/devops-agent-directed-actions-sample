@@ -1,0 +1,4 @@
+build/
+*.zip
+__pycache__/
+.ruff_cache/
